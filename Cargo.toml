@@ -1,0 +1,30 @@
+[package]
+name = "biz-error"
+version = "0.1.0"
+edition = "2024"
+authors = ["Yuxs <yuxs365@gmail.com>"]
+description = "A business error code management framework for Rust with auto-generation from YAML config"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yourusername/biz-error"
+keywords = ["error", "error-code", "i18n", "business", "codegen"]
+categories = ["development-tools", "web-programming", "internationalization"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+serde_yaml = { version = "0.9", optional = true }
+biz-error-macros = { path = "biz-error-macros", optional = true }
+axum = { version = "0.8.8", optional = true }
+
+[dev-dependencies]
+axum = "0.8.8"
+
+[features]
+default = ["axum"]
+axum = ["dep:axum"]
+codegen = ["serde_yaml", "biz-error-macros"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

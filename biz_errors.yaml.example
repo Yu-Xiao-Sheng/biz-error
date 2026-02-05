@@ -1,0 +1,224 @@
+# biz-error 业务错误码配置文件
+#
+# 💡 使用说明：
+# 1. 将此文件重命名为 biz_errors.yaml
+# 2. 根据你的业务需求修改错误码
+# 3. 运行 cargo build，自动生成 ErrorCode 枚举
+
+# 默认语言（用于未指定语言的错误消息）
+default_language: en
+
+# 支持的语言列表
+supported_languages:
+  - en
+  - zh-CN
+  - zh-TW
+
+# 错误码定义
+errors:
+  # ========== 成功 ==========
+  success:
+    code: 0
+    http_status: 200
+    message:
+      en: "SUCCESS"
+      zh-CN: "成功"
+      zh-TW: "成功"
+
+  # ========== 1000-1999: 认证/授权错误 ==========
+  not_login:
+    code: 1000
+    http_status: 401
+    message:
+      en: "NOT LOGIN"
+      zh-CN: "未登录"
+      zh-TW: "未登錄"
+
+  authority_failed:
+    code: 1001
+    http_status: 403
+    message:
+      en: "AUTHORITY FAILED"
+      zh-CN: "授权失败"
+      zh-TW: "授權失敗"
+
+  sign_failed:
+    code: 1002
+    http_status: 401
+    message:
+      en: "SIGN CHECK FAILED"
+      zh-CN: "签名校验失败"
+      zh-TW: "簽名校驗失敗"
+
+  access_token_invalid:
+    code: 10402
+    http_status: 401
+    message:
+      en: "ACCESS TOKEN INVALID"
+      zh-CN: "访问令牌失效"
+      zh-TW: "存取令牌失效"
+
+  refresh_token_invalid:
+    code: 10404
+    http_status: 401
+    message:
+      en: "REFRESH TOKEN INVALID"
+      zh-CN: "刷新令牌失效"
+      zh-TW: "刷新令牌失效"
+
+  user_locked:
+    code: 10406
+    http_status: 403
+    message:
+      en: "USER LOCKED FOR LOGIN"
+      zh-CN: "账号已被封禁"
+      zh-TW: "帳號已被封禁"
+
+  # ========== 2000-2999: 数据库/存储错误 ==========
+  db_error:
+    code: 2000
+    http_status: 500
+    message:
+      en: "DATABASE OPERATION ERROR"
+      zh-CN: "数据库操作错误"
+      zh-TW: "資料庫操作錯誤"
+
+  redis_error:
+    code: 2001
+    http_status: 500
+    message:
+      en: "REDIS OPERATION ERROR"
+      zh-CN: "缓存操作错误"
+      zh-TW: "快取操作錯誤"
+
+  http_error:
+    code: 2006
+    http_status: 500
+    message:
+      en: "HTTP REQUEST ERROR"
+      zh-CN: "HTTP 请求错误"
+      zh-TW: "HTTP 請求錯誤"
+
+  # ========== 3000-3999: API 相关 ==========
+  api_deprecated:
+    code: 3000
+    http_status: 410
+    message:
+      en: "API DEPRECATED"
+      zh-CN: "API 已废弃"
+      zh-TW: "API 已廢棄"
+
+  # ========== 4000-4999: 参数/请求错误 ==========
+  invalid_param:
+    code: 4000
+    http_status: 400
+    message:
+      en: "INVALID PARAMETER"
+      zh-CN: "参数无效"
+      zh-TW: "參數無效"
+
+  missing_param:
+    code: 4001
+    http_status: 400
+    message:
+      en: "MISSING REQUIRED PARAMETER"
+      zh-CN: "缺少必需参数"
+      zh-TW: "缺少必需參數"
+
+  param_format_error:
+    code: 4002
+    http_status: 400
+    message:
+      en: "PARAMETER FORMAT ERROR"
+      zh-CN: "参数格式错误"
+      zh-TW: "參數格式錯誤"
+
+  json_parse_failed:
+    code: 10015
+    http_status: 400
+    message:
+      en: "JSON PARSE FAILED"
+      zh-CN: "JSON 格式错误"
+      zh-TW: "JSON 格式錯誤"
+
+  illegal_request:
+    code: 10019
+    http_status: 400
+    message:
+      en: "ILLEGAL REQUEST"
+      zh-CN: "非法请求"
+      zh-TW: "非法請求"
+
+  # ========== 4200-4299: 运行时错误 ==========
+  runtime_error:
+    code: 4200
+    http_status: 422
+    message:
+      en: "RUNTIME ERROR"
+      zh-CN: "运行时错误"
+      zh-TW: "運行時錯誤"
+
+  not_found:
+    code: 4204
+    http_status: 404
+    message:
+      en: "RESOURCE NOT FOUND"
+      zh-CN: "资源不存在"
+      zh-TW: "資源不存在"
+
+  already_exists:
+    code: 10016
+    http_status: 409
+    message:
+      en: "RESOURCE ALREADY EXISTS"
+      zh-CN: "资源已存在"
+      zh-TW: "資源已存在"
+
+  permission_denied:
+    code: 4203
+    http_status: 403
+    message:
+      en: "PERMISSION DENIED"
+      zh-CN: "权限不足"
+      zh-TW: "權限不足"
+
+  request_too_many:
+    code: 10005
+    http_status: 429
+    message:
+      en: "TOO MANY REQUESTS"
+      zh-CN: "请求过于频繁"
+      zh-TW: "請求過於頻繁"
+
+  # ========== 5000-5999: 服务器错误 ==========
+  internal_error:
+    code: 5000
+    http_status: 500
+    message:
+      en: "INTERNAL SERVER ERROR"
+      zh-CN: "服务器内部错误"
+      zh-TW: "伺服器內部錯誤"
+
+  config_error:
+    code: 5003
+    http_status: 500
+    message:
+      en: "CONFIGURATION ERROR"
+      zh-CN: "配置错误"
+      zh-TW: "配置錯誤"
+
+  resource_not_enough:
+    code: 10020
+    http_status: 503
+    message:
+      en: "RESOURCE NOT ENOUGH"
+      zh-CN: "资源不足"
+      zh-TW: "資源不足"
+
+  global_lock_fail:
+    code: 10017
+    http_status: 423
+    message:
+      en: "RESOURCE LOCKED"
+      zh-CN: "资源已被锁定"
+      zh-TW: "資源已被鎖定"
