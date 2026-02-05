@@ -14,7 +14,7 @@ readme = "README.md"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 serde_yaml = { version = "0.9", optional = true }
-biz-error-macros = { path = "biz-error-macros", optional = true }
+biz-error-macros = { version = "0.1.0", optional = true }
 axum = { version = "0.8.8", optional = true }
 
 [dev-dependencies]
