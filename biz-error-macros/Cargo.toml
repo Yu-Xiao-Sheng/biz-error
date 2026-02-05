@@ -6,7 +6,7 @@ authors = ["Yuxs <yuxs365@gmail.com>"]
 description = "Procedural macros for biz-error code generation"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/yourusername/biz-error"
-keywords = ["error", "error-code", "i18n", "business", "codegen", "procedural-macro"]
+keywords = ["error", "codegen", "business", "i18n", "procedural-macro"]
 categories = ["development-tools", "web-programming"]
 
 [lib]
