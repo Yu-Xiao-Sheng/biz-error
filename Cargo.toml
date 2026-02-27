@@ -1,6 +1,6 @@
 [package]
 name = "biz-error"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 authors = ["Yuxs <yuxs365@gmail.com>"]
 description = "A business error code management framework for Rust with auto-generation from YAML config"
@@ -16,14 +16,19 @@ serde_json = "1.0.149"
 serde_yaml = { version = "0.9", optional = true }
 biz-error-macros = { version = "0.1.0", optional = true }
 axum = { version = "0.8.8", optional = true }
+tokio = { version = "1", features = ["sync"], optional = true }
 
 [dev-dependencies]
 axum = "0.8.8"
+proptest = "1.4"
+tokio = { version = "1", features = ["full"] }
 
 [features]
 default = ["axum"]
 axum = ["dep:axum"]
-codegen = ["serde_yaml", "biz-error-macros"]
+codegen = ["dep:serde_yaml", "biz-error-macros"]
+runtime-messages = ["dep:tokio"]
+doc-gen = ["dep:serde_yaml"]
 
 [package.metadata.docs.rs]
 all-features = true
