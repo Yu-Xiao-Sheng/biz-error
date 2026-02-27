@@ -82,6 +82,20 @@ pub mod codegen;
 #[cfg(feature = "codegen")]
 pub use biz_error_macros::generate_error_codes;
 
+// 运行时动态消息模块
+#[cfg(feature = "runtime-messages")]
+pub mod runtime;
+
+#[cfg(feature = "runtime-messages")]
+pub use runtime::{MessageProvider, MessageRegistry};
+
+// 错误码文档生成模块
+#[cfg(feature = "doc-gen")]
+pub mod docgen;
+
+#[cfg(feature = "doc-gen")]
+pub use docgen::{DocConfig, DocGenError, DocGenerator, ErrorDefinition};
+
 use serde::Serialize;
 use serde_json::Value;
 use std::fmt;
@@ -114,6 +128,44 @@ pub trait ErrorCode: Copy + Clone + std::fmt::Debug + PartialEq + Eq + Send + Sy
     #[cfg(feature = "axum")]
     fn http_status(&self) -> StatusCode;
 }
+
+// ============================================
+// ErrorCodeExt trait - 动态消息扩展
+// ============================================
+
+/// ErrorCode trait 的动态消息扩展
+///
+/// 启用 `runtime-messages` feature 后可用。
+/// 提供"动态优先、静态回退"的消息查询策略。
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// use biz_error::{ErrorCode, ErrorCodeExt};
+///
+/// // 获取动态消息（默认语言 "en"），回退到静态消息
+/// let msg = error_code.dynamic_message();
+///
+/// // 获取指定语言的动态消息，回退到静态消息
+/// let msg = error_code.dynamic_message_lang("zh-CN");
+/// ```
+#[cfg(feature = "runtime-messages")]
+pub trait ErrorCodeExt: ErrorCode {
+    /// 获取动态消息（默认语言），回退到静态消息
+    fn dynamic_message(&self) -> String {
+        self.dynamic_message_lang("en")
+    }
+
+    /// 获取指定语言的动态消息，回退到静态消息
+    fn dynamic_message_lang(&self, lang: &str) -> String {
+        MessageRegistry::get_message(self.code(), lang)
+            .unwrap_or_else(|| self.message_lang(lang).to_string())
+    }
+}
+
+/// 为所有实现 ErrorCode 的类型自动实现 ErrorCodeExt
+#[cfg(feature = "runtime-messages")]
+impl<T: ErrorCode> ErrorCodeExt for T {}
 
 // ============================================
 // 错误响应结构
@@ -247,7 +299,11 @@ pub struct AppError<E: ErrorCode> {
     custom_msg: Option<String>,
     /// 附加数据
     data: Option<Value>,
+    /// 语言标识（用于动态消息查询）
+    #[cfg(feature = "runtime-messages")]
+    lang: Option<String>,
 }
+
 
 impl<E: ErrorCode> AppError<E> {
     /// 创建新的业务错误
@@ -265,6 +321,8 @@ impl<E: ErrorCode> AppError<E> {
             error_code,
             custom_msg: None,
             data: None,
+            #[cfg(feature = "runtime-messages")]
+            lang: None,
         }
     }
 
@@ -299,6 +357,23 @@ impl<E: ErrorCode> AppError<E> {
         self
     }
 
+    /// 设置语言标识（用于动态消息查询）
+    ///
+    /// 启用 `runtime-messages` feature 后可用。
+    /// 设置后，`resolved_msg()` 和 `to_response()` 将使用指定语言查询动态消息。
+    ///
+    /// # Examples
+    ///
+    /// ```rust,ignore
+    /// let error = AppError::new(ErrorCode::InvalidParam)
+    ///     .with_lang("zh-CN");
+    /// ```
+    #[cfg(feature = "runtime-messages")]
+    pub fn with_lang(mut self, lang: impl Into<String>) -> Self {
+        self.lang = Some(lang.into());
+        self
+    }
+
     /// 获取错误码枚举
     pub fn error_code(&self) -> E {
         self.error_code
@@ -316,6 +391,21 @@ impl<E: ErrorCode> AppError<E> {
             .unwrap_or_else(|| self.error_code.message())
     }
 
+    /// 获取解析后的完整消息（runtime-messages 条件编译）
+    ///
+    /// 消息优先级链：
+    /// 1. `custom_msg`（用户通过 `with_msg()` 设置）— 最高优先级
+    /// 2. `dynamic_message_lang(lang)`（`runtime-messages` 启用时）— 中优先级
+    /// 3. `error_code.message()`（静态消息）— 回退
+    #[cfg(feature = "runtime-messages")]
+    pub fn resolved_msg(&self) -> String {
+        if let Some(ref msg) = self.custom_msg {
+            return msg.clone();
+        }
+        let lang = self.lang.as_deref().unwrap_or("en");
+        self.error_code.dynamic_message_lang(lang)
+    }
+
     /// 获取附加数据
     pub fn data(&self) -> Option<&Value> {
         self.data.as_ref()
@@ -324,9 +414,19 @@ impl<E: ErrorCode> AppError<E> {
     /// 转换为 ErrorResponse
     pub fn to_response(&self) -> ErrorResponse {
         let mut resp = ErrorResponse::from_error_code(self.error_code);
+
+        // 当 runtime-messages 启用时，使用完整优先级链获取消息
+        #[cfg(feature = "runtime-messages")]
+        {
+            resp = resp.with_msg(self.resolved_msg());
+        }
+
+        // 当 runtime-messages 未启用时，仅使用 custom_msg 覆盖
+        #[cfg(not(feature = "runtime-messages"))]
         if let Some(ref msg) = self.custom_msg {
             resp = resp.with_msg(msg);
         }
+
         if let Some(ref data) = self.data {
             resp = resp.with_data(data.clone());
         }
